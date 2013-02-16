@@ -1,28 +1,32 @@
 ﻿using System;
 using System.IO;
+using System.Windows.Forms;
 using System.Workflow.Activities.Rules;
+using System.Workflow.Activities.Rules.Design;
 using System.Workflow.ComponentModel.Serialization;
 using System.Xml;
 
 namespace Original {
-	class Program
-	{
+	internal class Program {
 		private const string Filename = "Test.rules.xml";
 
 		static void Main() {
 			RuleSet ruleset = null;
 
-			Person person = new Person {Age = 70};
-
+			// Obtain or create ruleset
 			if (File.Exists(Filename)) {
 				// load file
 				ruleset = Load(Filename);
+			} else {
+				ruleset = new RuleSet();
 			}
 
-			if (ruleset != null) {
-				RuleValidation validation = new RuleValidation(person.GetType(), null);
-				RuleExecution engine = new RuleExecution(validation, person);
-				ruleset.Execute(engine);
+			RuleSetDialog dialog = new RuleSetDialog(typeof(Person), null, ruleset);
+			DialogResult result = dialog.ShowDialog();
+
+			if (result == DialogResult.OK) {
+				// save the file
+				Save(Filename, dialog.RuleSet);
 			}
 		}
 
@@ -37,5 +41,13 @@ namespace Original {
 			}
 			return ruleset;
 		}
+
+		static void Save(string filename, RuleSet ruleset) {
+			XmlTextWriter writer = new XmlTextWriter(filename, null);
+			WorkflowMarkupSerializer serializer = new WorkflowMarkupSerializer();
+			serializer.Serialize(writer, ruleset);
+			Console.WriteLine("Wrote rules file: " + filename);
+		}
+
 	}
 }
