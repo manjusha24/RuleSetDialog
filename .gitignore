@@ -1,0 +1,7 @@
+*.suo
+
+Data/bin*
+Data/obj*
+
+Original/bin*
+Original/obj*
